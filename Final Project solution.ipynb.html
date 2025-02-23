@@ -1,0 +1,90 @@
+<html>
+<head>
+<title>Final Project solution.ipynb</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #7a7e85;}
+.s1 { color: #cf8e6d;}
+.s2 { color: #bcbec4;}
+.s3 { color: #bcbec4;}
+.s4 { color: #6aab73;}
+.s5 { color: #2aacb8;}
+</style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+Final Project solution.ipynb</font>
+</center></td></tr></table>
+<pre><span class="s0">#%% 
+</span><span class="s1">import </span><span class="s2">pandas </span><span class="s1">as </span><span class="s2">pd</span>
+<span class="s1">import </span><span class="s2">numpy </span><span class="s1">as </span><span class="s2">np</span>
+<span class="s1">import </span><span class="s2">matplotlib</span><span class="s3">.</span><span class="s2">pyplot </span><span class="s1">as </span><span class="s2">plt</span>
+<span class="s1">import </span><span class="s2">seaborn </span><span class="s1">as </span><span class="s2">sns</span>
+<span class="s1">from </span><span class="s2">sklearn</span><span class="s3">.</span><span class="s2">model_selection </span><span class="s1">import </span><span class="s2">train_test_split</span>
+<span class="s1">from </span><span class="s2">sklearn</span><span class="s3">.</span><span class="s2">linear_model </span><span class="s1">import </span><span class="s2">LinearRegression</span>
+<span class="s1">from </span><span class="s2">sklearn</span><span class="s3">.</span><span class="s2">metrics </span><span class="s1">import </span><span class="s2">mean_squared_error</span><span class="s3">, </span><span class="s2">r2_score</span>
+<span class="s1">from </span><span class="s2">sklearn</span><span class="s3">.</span><span class="s2">preprocessing </span><span class="s1">import </span><span class="s2">OneHotEncoder</span>
+
+<span class="s0"># Load the dataset</span>
+<span class="s2">df </span><span class="s3">= </span><span class="s2">pd</span><span class="s3">.</span><span class="s2">read_csv</span><span class="s3">(</span><span class="s4">'cars.csv'</span><span class="s3">)</span>
+
+<span class="s0"># Exploratory Data Analysis</span>
+<span class="s0"># Univariate Analysis</span>
+<span class="s2">sns</span><span class="s3">.</span><span class="s2">histplot</span><span class="s3">(</span><span class="s2">df</span><span class="s3">[</span><span class="s4">'price'</span><span class="s3">])</span>
+<span class="s2">plt</span><span class="s3">.</span><span class="s2">title</span><span class="s3">(</span><span class="s4">'Price Distribution'</span><span class="s3">)</span>
+<span class="s2">plt</span><span class="s3">.</span><span class="s2">show</span><span class="s3">()</span>
+
+<span class="s0"># Multivariate Analysis</span>
+<span class="s2">sns</span><span class="s3">.</span><span class="s2">pairplot</span><span class="s3">(</span><span class="s2">df</span><span class="s3">)</span>
+<span class="s2">plt</span><span class="s3">.</span><span class="s2">show</span><span class="s3">()</span>
+
+<span class="s0"># Data Preprocessing</span>
+<span class="s0"># Handling missing values</span>
+<span class="s2">df </span><span class="s3">= </span><span class="s2">df</span><span class="s3">.</span><span class="s2">dropna</span><span class="s3">()</span>
+
+<span class="s0"># Convert categorical data to numerical data using OneHotEncoder</span>
+<span class="s2">categorical_features </span><span class="s3">= [</span><span class="s4">'brand'</span><span class="s3">, </span><span class="s4">'fuel_type'</span><span class="s3">, </span><span class="s4">'city'</span><span class="s3">]</span>
+<span class="s2">encoder </span><span class="s3">= </span><span class="s2">OneHotEncoder</span><span class="s3">(</span><span class="s2">sparse</span><span class="s3">=</span><span class="s1">False</span><span class="s3">, </span><span class="s2">drop</span><span class="s3">=</span><span class="s4">'first'</span><span class="s3">)</span>
+<span class="s2">encoded_features </span><span class="s3">= </span><span class="s2">encoder</span><span class="s3">.</span><span class="s2">fit_transform</span><span class="s3">(</span><span class="s2">df</span><span class="s3">[</span><span class="s2">categorical_features</span><span class="s3">])</span>
+
+<span class="s0"># Create a DataFrame with the encoded features</span>
+<span class="s2">encoded_df </span><span class="s3">= </span><span class="s2">pd</span><span class="s3">.</span><span class="s2">DataFrame</span><span class="s3">(</span><span class="s2">encoded_features</span><span class="s3">, </span><span class="s2">columns</span><span class="s3">=</span><span class="s2">encoder</span><span class="s3">.</span><span class="s2">get_feature_names_out</span><span class="s3">(</span><span class="s2">categorical_features</span><span class="s3">))</span>
+
+<span class="s0"># Drop original categorical columns and concatenate encoded columns</span>
+<span class="s2">df </span><span class="s3">= </span><span class="s2">df</span><span class="s3">.</span><span class="s2">drop</span><span class="s3">(</span><span class="s2">categorical_features</span><span class="s3">, </span><span class="s2">axis</span><span class="s3">=</span><span class="s5">1</span><span class="s3">)</span>
+<span class="s2">df </span><span class="s3">= </span><span class="s2">pd</span><span class="s3">.</span><span class="s2">concat</span><span class="s3">([</span><span class="s2">df</span><span class="s3">, </span><span class="s2">encoded_df</span><span class="s3">], </span><span class="s2">axis</span><span class="s3">=</span><span class="s5">1</span><span class="s3">)</span>
+
+<span class="s0"># Separate features and target variable</span>
+<span class="s2">X </span><span class="s3">= </span><span class="s2">df</span><span class="s3">.</span><span class="s2">drop</span><span class="s3">([</span><span class="s4">'price'</span><span class="s3">, </span><span class="s4">'Id'</span><span class="s3">, </span><span class="s4">'full_model_name'</span><span class="s3">], </span><span class="s2">axis</span><span class="s3">=</span><span class="s5">1</span><span class="s3">)</span>
+<span class="s2">y </span><span class="s3">= </span><span class="s2">df</span><span class="s3">[</span><span class="s4">'price'</span><span class="s3">]</span>
+
+<span class="s0"># Split the data</span>
+<span class="s2">X_train</span><span class="s3">, </span><span class="s2">X_test</span><span class="s3">, </span><span class="s2">y_train</span><span class="s3">, </span><span class="s2">y_test </span><span class="s3">= </span><span class="s2">train_test_split</span><span class="s3">(</span><span class="s2">X</span><span class="s3">, </span><span class="s2">y</span><span class="s3">, </span><span class="s2">test_size</span><span class="s3">=</span><span class="s5">0.2</span><span class="s3">, </span><span class="s2">random_state</span><span class="s3">=</span><span class="s5">42</span><span class="s3">)</span>
+
+<span class="s0"># Train the model</span>
+<span class="s2">model </span><span class="s3">= </span><span class="s2">LinearRegression</span><span class="s3">()</span>
+<span class="s2">model</span><span class="s3">.</span><span class="s2">fit</span><span class="s3">(</span><span class="s2">X_train</span><span class="s3">, </span><span class="s2">y_train</span><span class="s3">)</span>
+
+<span class="s0"># Make predictions</span>
+<span class="s2">y_pred </span><span class="s3">= </span><span class="s2">model</span><span class="s3">.</span><span class="s2">predict</span><span class="s3">(</span><span class="s2">X_test</span><span class="s3">)</span>
+
+<span class="s0"># Evaluate the model</span>
+<span class="s2">mse </span><span class="s3">= </span><span class="s2">mean_squared_error</span><span class="s3">(</span><span class="s2">y_test</span><span class="s3">, </span><span class="s2">y_pred</span><span class="s3">)</span>
+<span class="s2">r2 </span><span class="s3">= </span><span class="s2">r2_score</span><span class="s3">(</span><span class="s2">y_test</span><span class="s3">, </span><span class="s2">y_pred</span><span class="s3">)</span>
+
+<span class="s2">print</span><span class="s3">(</span><span class="s4">f'Mean Squared Error: </span><span class="s1">{</span><span class="s2">mse</span><span class="s1">}</span><span class="s4">'</span><span class="s3">)</span>
+<span class="s2">print</span><span class="s3">(</span><span class="s4">f'R-squared: </span><span class="s1">{</span><span class="s2">r2</span><span class="s1">}</span><span class="s4">'</span><span class="s3">)</span>
+
+<span class="s0"># Feature importance</span>
+<span class="s2">importance </span><span class="s3">= </span><span class="s2">model</span><span class="s3">.</span><span class="s2">coef_</span>
+<span class="s2">features </span><span class="s3">= </span><span class="s2">X</span><span class="s3">.</span><span class="s2">columns</span>
+<span class="s2">feature_importance </span><span class="s3">= </span><span class="s2">pd</span><span class="s3">.</span><span class="s2">DataFrame</span><span class="s3">({</span><span class="s4">'Feature'</span><span class="s3">: </span><span class="s2">features</span><span class="s3">, </span><span class="s4">'Importance'</span><span class="s3">: </span><span class="s2">importance</span><span class="s3">})</span>
+<span class="s2">feature_importance </span><span class="s3">= </span><span class="s2">feature_importance</span><span class="s3">.</span><span class="s2">sort_values</span><span class="s3">(</span><span class="s2">by</span><span class="s3">=</span><span class="s4">'Importance'</span><span class="s3">, </span><span class="s2">ascending</span><span class="s3">=</span><span class="s1">False</span><span class="s3">)</span>
+<span class="s2">print</span><span class="s3">(</span><span class="s2">feature_importance</span><span class="s3">)</span>
+
+<span class="s0">#%% 
+</span></pre>
+</body>
+</html>
